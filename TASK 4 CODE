@@ -1,0 +1,122 @@
+%pip install seaborn
+
+#1)LOAD AND EXPLORE THE DATASET
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load the dataset
+df = pd.read_csv('house_prices.csv')
+
+# Display first few rows of the dataset
+df.head()
+
+# Check for missing values
+df.isnull().sum()
+
+# Check basic statistics
+df.describe()
+
+#2)HANDLING MISSING VALUES
+#a) Handling Missing Values
+# Drop rows with missing values (if any)
+print(df.isnull().sum())  # Shows count of missing values per column
+
+df = df.dropna()
+print("After dropping missing values:")
+print(df.info())  # Check if the number of rows changed
+print(df.head())  # Preview data
+
+# Alternatively, you can fill missing values with the mean/median
+# df['column_name'] = df['column_name'].fillna(df['column_name'].mean())
+
+#b) Visualizing Distributions and Outliers
+# Plot distributions for numerical variables
+plt.figure(figsize=(10,5))
+sns.histplot(df['Size'], kde=True, color='blue', label='Size')
+sns.histplot(df['Price'], kde=True, color='green', label='Price')
+plt.legend()
+plt.show()
+
+# Boxplot for outliers detection
+plt.figure(figsize=(10,5))
+sns.boxplot(data=df[['Size', 'Price']])
+plt.show()
+
+#c) Normalizing Numerical Data
+# Use Min-Max Scaling or Standardization
+scaler = MinMaxScaler()
+
+# Normalize 'Size' and 'Number_of_Rooms' columns
+df[['Size', 'Number of Rooms']] = scaler.fit_transform(df[['Size', 'Number of Rooms']])
+print(df.head())
+
+# You can also use StandardScaler if you prefer standardization
+# scaler = StandardScaler()
+# df[['Size', 'Number_of_Rooms']] = scaler.fit_transform(df[['Size', 'Number_of_Rooms']])
+
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv("house_prices.csv")
+
+# Debug: Check column names before encoding
+print("Before encoding, columns:", df.columns)
+
+# Ensure 'Location' exists and has no extra spaces
+df.rename(columns=lambda x: x.strip(), inplace=True)
+
+# Debug: Verify again
+print("After stripping spaces, columns:", df.columns)
+
+# Apply One-Hot Encoding if 'Location' exists
+if 'Location' in df.columns:
+    df = pd.get_dummies(df, columns=['Location'], drop_first=True)
+    print("Encoding successful. New columns:", df.columns)
+else:
+    print("Error: 'Location' column not found in the dataset.")
+
+#3) FEATURE SELECTION
+# Analyze correlations
+correlation_matrix = df.corr()
+plt.figure(figsize=(10,7))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+plt.show()
+
+# Drop low-impact predictors (for simplicity, let's assume we drop 'Location_suburban' here)
+df = df.drop(columns=['Location_Suburban'])  # Example
+
+#4)MODEL TRAINING
+#a) Train-Test Split
+# Split data into features and target variable
+X = df.drop(columns=['Price'])
+y = df['Price']
+
+# Split into train and test sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+#b)Train Linear Regression Model
+# Create and train the linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = model.predict(X_test)
+
+#5)MODEL EVALUATION
+#a) Evaluation Metrics
+# Calculate RMSE
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+# Calculate R² (Coefficient of Determination)
+r2 = r2_score(y_test, y_pred)
+
+# Display evaluation metrics
+print(f"RMSE: {rmse}")
+print(f"R²: {r2}")
