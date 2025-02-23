@@ -1,0 +1,91 @@
+%pip install seaborn
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+#PART 1 : DIMENSIONALITY REDUCTION (PCA-Principal Component Analysis)
+
+from sklearn.datasets import load_iris
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Standardizing the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Applying PCA*********
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Scatter plot of PCA results
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], hue=y, palette="viridis")
+plt.title("PCA: Iris Dataset in 2D")
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.show()
+
+
+#PART 2 : STOCK PRICE PREDICTION USING ARIMA
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_squared_error
+
+# Load dataset
+df = pd.read_csv("stock_prices.csv")
+
+# Convert Date column to datetime and set it as the index
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+
+# Set explicit frequency to avoid warnings
+df = df.asfreq('D')
+
+# Handle missing values with forward fill
+df.ffill(inplace=True)
+
+# Ensure dataset is large enough
+if len(df) < 50:
+    print(f"Warning: Dataset is too small ({len(df)} records). ARIMA may not perform well.")
+
+# Train-test split (70% training, 30% testing for small datasets)
+train_size = int(len(df) * 0.7)
+train, test = df['Close'][:train_size], df['Close'][train_size:]
+
+# Check if test set is non-empty
+if len(test) == 0:
+    raise ValueError("Test set is empty. Reduce the train size or use more data.")
+
+# Fit ARIMA model
+model = ARIMA(train, order=(1, 1, 1), enforce_stationarity=False, enforce_invertibility=False)
+model_fit = model.fit()
+
+# Forecast
+forecast = model_fit.forecast(steps=len(test))
+
+# Evaluate model performance
+rmse = np.sqrt(mean_squared_error(test, forecast))
+
+# Plot results
+plt.figure(figsize=(10, 5))
+plt.plot(test.index, test, label="Actual Prices", color="blue")
+plt.plot(test.index, forecast, label="Predicted Prices", color="red", linestyle="dashed")
+plt.xlabel("Date")
+plt.ylabel("Stock Price")
+plt.title("Stock Price Prediction using ARIMA")
+plt.legend()
+plt.show()
+
+print(f"Model Evaluation: RMSE = {rmse:.2f}")
