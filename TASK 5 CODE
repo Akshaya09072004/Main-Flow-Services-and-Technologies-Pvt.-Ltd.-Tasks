@@ -1,0 +1,108 @@
+#Task 5: Classification Tasks Overview
+#2)Sentiment Analysis with Natural Language Processing
+import numpy as np
+import pandas as pd
+import re
+import string
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+
+# Step 1: Load Dataset
+df = pd.read_csv("reviews.csv")
+print("REVIEWS.CSV SUCCESSFULLY LOADED!\n")
+
+# Step 2: Preprocessing
+print("DATA PREPROCESSING:")
+def preprocess_text(text):
+    text = text.lower()
+    text = re.sub(f"[{string.punctuation}]", "", text)
+    text = re.sub(r"\d+", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+df['Cleaned_Review'] = df['Review'].astype(str).apply(preprocess_text)
+
+# Step 3: Check Class Distribution
+print("CLASS DISTRIBUTION:")
+print(df['Sentiment'].value_counts())
+
+
+# Step 4: Text Vectorization using TF-IDF
+print("\nTEXT VECTORIZATION:")
+vectorizer = TfidfVectorizer(stop_words="english")
+X = vectorizer.fit_transform(df['Cleaned_Review'])
+y = df['Sentiment'].apply(lambda x: 1 if x.lower() == 'positive' else 0)
+
+# Step 5: Train-Test Split
+print("\nMODEL")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Check if TF-IDF produced features
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
+
+# Step 6: Model Training with Class Balancing
+print("MODEL TRAINING:")
+model = LogisticRegression(class_weight='balanced')
+model.fit(X_train, y_train)
+
+# Step 7: Model Evaluation with Zero-Division Fix
+print("\nMODEL EVALUATION")
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, zero_division=1)
+recall = recall_score(y_test, y_pred, zero_division=1)
+f1 = f1_score(y_test, y_pred, zero_division=1)
+
+print(f"Model Accuracy: {accuracy:.2f}")
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+print(f"F1-Score: {f1:.2f}")
+print("\nCLASSIFICATION REPORT:")
+print(classification_report(y_test, y_pred, zero_division=1))
+
+
+
+
+
+#Task 5: Classification Tasks Overview
+#1)Student Pass/Fail Predictionimport numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Step 1: Creating the dataset and saving as CSV
+df = pd.read_csv("student_data.csv")
+print("Dataset saved as student_data.csv")
+
+# Step 2: Data Exploration
+sns.scatterplot(x='Study_Hours', y='Attendance', hue='Pass', data=df)
+plt.xlabel("Study Hours")
+plt.ylabel("Attendance (%)")
+plt.title("Study Hours vs Attendance (Pass/Fail)")
+plt.show()
+
+# Step 3: Splitting data into train and test sets
+X = df[['Study_Hours', 'Attendance']]
+y = df['Pass']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 4: Model Training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Step 5: Model Evaluation
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print(f"Model Accuracy: {accuracy:.2f}")
+print("Confusion Matrix:")
+print(conf_matrix)
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
