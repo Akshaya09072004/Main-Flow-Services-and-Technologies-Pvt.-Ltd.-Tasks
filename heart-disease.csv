@@ -1,0 +1,16 @@
+Age,Gender,Cholesterol,Systolic,Diastolic,Heart Disease
+45,Male,220,140,90,1
+50,Female,180,130,85,0
+60,Male,240,150,95,1
+55,Female,200,120,80,0
+65,Male,260,160,100,1
+48,Female,190,125,82,0
+52,Male,230,145,92,1
+58,Female,210,135,88,0
+63,Male,250,155,98,1
+57,Female,195,122,84,0
+54,Male,225,142,90,1
+59,Female,215,138,86,0
+66,Male,270,165,105,1
+53,Female,205,128,83,0
+61,Male,255,158,96,1
